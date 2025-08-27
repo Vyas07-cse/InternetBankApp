@@ -1,4 +1,5 @@
 package com.example.internetbanking.service;
+
 import com.example.internetbanking.service.impl.ScheduledPaymentServiceImpl;
 import com.example.internetbanking.entity.ScheduledPayment;
 import com.example.internetbanking.exception.AccountOperationException;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -40,7 +40,7 @@ class ScheduledPaymentServiceImplTest {
         mockPayment = new ScheduledPayment();
         mockPayment.setAccountNumber("1234567890");
         mockPayment.setBillType("Electricity");
-        mockPayment.setAmount(new BigDecimal("500.00"));
+        mockPayment.setAmount(500.00);  // changed from BigDecimal to double
         mockPayment.setScheduledDate(LocalDateTime.now().plusDays(1));
         mockPayment.setServiceNumber("ELEC98765");
     }
@@ -86,7 +86,7 @@ class ScheduledPaymentServiceImplTest {
 
     @Test
     void testSchedulePayment_ZeroAmount() {
-        mockPayment.setAmount(BigDecimal.ZERO);
+        mockPayment.setAmount(0.0);  // zero in double
 
         AccountOperationException ex = assertThrows(AccountOperationException.class, () ->
                 scheduledPaymentService.schedulePayment(mockPayment));

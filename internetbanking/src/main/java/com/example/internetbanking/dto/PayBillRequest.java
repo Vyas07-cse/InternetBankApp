@@ -1,5 +1,4 @@
 package com.example.internetbanking.dto;
-import java.math.*;
 import jakarta.validation.constraints.*;
 
 public class PayBillRequest {
@@ -12,7 +11,7 @@ public class PayBillRequest {
     private String billType;
 
     @Positive(message = "Bill amount must be greater than zero")
-    private BigDecimal billAmount;
+    private double billAmount;
 
     @NotBlank(message = "Service number is required")
     @Size(min = 5, max = 20, message = "Service number must be between 5 and 20 characters")
@@ -36,11 +35,11 @@ public class PayBillRequest {
         this.billType = billType;
     }
 
-    public BigDecimal getBillAmount() {
+    public double getBillAmount() {
         return billAmount;
     }
 
-    public void setBillAmount(BigDecimal billAmount) {
+    public void setBillAmount(double  billAmount) {
         this.billAmount = billAmount;
     }
 

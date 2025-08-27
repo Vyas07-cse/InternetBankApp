@@ -1,6 +1,5 @@
 package com.example.internetbanking.dto;
 import jakarta.validation.constraints.*;
-import java.math.BigDecimal;
 
 public class RechargeRequest {
 	
@@ -14,7 +13,7 @@ public class RechargeRequest {
 	
 	@NotNull(message = "Amount is required")
     @DecimalMin(value = "1.00", message = "Amount must be at least ₹1.00")
-    private BigDecimal amount;
+    private double amount;
 
     
     public String getAccountNumber() {
@@ -31,10 +30,10 @@ public class RechargeRequest {
         this.tpin = tpin;
     }
 
-    public BigDecimal getAmount() {
+    public double getAmount() {
         return amount;
     }
-    public void setAmount(BigDecimal amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
     }
 }

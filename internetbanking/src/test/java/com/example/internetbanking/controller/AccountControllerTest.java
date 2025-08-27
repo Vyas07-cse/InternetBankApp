@@ -1,4 +1,5 @@
 package com.example.internetbanking.controller;
+
 import com.example.internetbanking.service.impl.JWTService;
 import com.example.internetbanking.dto.RechargeRequest;
 import com.example.internetbanking.entity.Account;
@@ -17,7 +18,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -35,7 +35,7 @@ public class AccountControllerTest {
 
     @MockBean
     private AccountService accountService;
-    
+
     @MockBean
     private AccountRepository accountRepository;
 
@@ -44,7 +44,7 @@ public class AccountControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-    
+
     @MockBean
     private JWTService jwtService;
 
@@ -56,18 +56,18 @@ public class AccountControllerTest {
     void setUp() {
         mockAccount = new Account();
         mockAccount.setAccountNumber("1234567890");
-        mockAccount.setCurrentBalance(new BigDecimal("1000.00"));
+        mockAccount.setCurrentBalance(1000.00);
         mockAccount.setUserId("user123");
         mockAccount.setAccountType("Savings");
         mockAccount.setTpin(1234);
 
         mockUser = new User();
         mockUser.setUserId("user123");
-        
+
         mockRechargeRequest = new RechargeRequest();
         mockRechargeRequest.setAccountNumber("1234567890");
         mockRechargeRequest.setTpin(1234);
-        mockRechargeRequest.setAmount(new BigDecimal("100.00"));
+        mockRechargeRequest.setAmount(100.00);
     }
 
     @Test
@@ -78,10 +78,10 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].accountNumber").value("1234567890"));
     }
-    
+
     @Test
     void testGetAccountBalance_Success() throws Exception {
-        when(accountService.getBalance("1234567890")).thenReturn(new BigDecimal("1000.00"));
+        when(accountService.getBalance("1234567890")).thenReturn(1000.00);
 
         mockMvc.perform(get("/api/accounts/{accNo}/balance", "1234567890"))
                 .andExpect(status().isOk())
@@ -96,34 +96,33 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accountNumber").value("1234567890"));
     }
-    
+
     @Test
     void testGetTransactions_Success() throws Exception {
         Transaction transaction = new Transaction();
-        transaction.setUtrNumber("utr123"); 
+        transaction.setUtrNumber("utr123");
         when(accountService.getTransactions("1234567890")).thenReturn(List.of(transaction));
 
         mockMvc.perform(get("/api/accounts/{accNo}/transactions", "1234567890"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].utrNumber").value("utr123")); 
+                .andExpect(jsonPath("$[0].utrNumber").value("utr123"));
     }
 
     @Test
     void testGetMiniStatement_Success() throws Exception {
         Transaction transaction = new Transaction();
-        transaction.setUtrNumber("utr123"); 
+        transaction.setUtrNumber("utr123");
         when(accountService.getMiniStatement("1234567890")).thenReturn(List.of(transaction));
 
         mockMvc.perform(get("/api/accounts/{accNo}/mini", "1234567890"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].utrNumber").value("utr123"));
     }
-    
-  
+
     @Test
     void testCreateAccount_Success() throws Exception {
         when(userRepository.findByUserId("user123")).thenReturn(mockUser);
-        when(accountService.createAccount1(anyString(), anyString(), any(BigDecimal.class), anyInt()))
+        when(accountService.createAccount1(anyString(), anyString(), anyDouble(), anyInt()))
                 .thenReturn(mockAccount);
 
         mockMvc.perform(post("/api/accounts/create")
@@ -132,7 +131,7 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accountNumber").value("1234567890"));
     }
-    
+
     @Test
     void testCreateAccount_UserNotFound() throws Exception {
         when(userRepository.findByUserId("user123")).thenReturn(null);
@@ -142,10 +141,10 @@ public class AccountControllerTest {
                 .content(objectMapper.writeValueAsString(mockAccount)))
                 .andExpect(status().isNotFound());
     }
-    
+
     @Test
     void testRechargeAccount_Success() throws Exception {
-        when(accountService.rechargeAccount(anyString(), anyInt(), any(BigDecimal.class))).thenReturn(true);
+        when(accountService.rechargeAccount(anyString(), anyInt(), anyDouble())).thenReturn(true);
 
         mockMvc.perform(post("/api/accounts/recharge")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -156,7 +155,7 @@ public class AccountControllerTest {
 
     @Test
     void testRechargeAccount_Failure() throws Exception {
-        when(accountService.rechargeAccount(anyString(), anyInt(), any(BigDecimal.class))).thenReturn(false);
+        when(accountService.rechargeAccount(anyString(), anyInt(), anyDouble())).thenReturn(false);
 
         mockMvc.perform(post("/api/accounts/recharge")
                 .contentType(MediaType.APPLICATION_JSON)

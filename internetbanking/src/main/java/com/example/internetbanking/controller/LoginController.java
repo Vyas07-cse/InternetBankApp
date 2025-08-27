@@ -13,7 +13,6 @@ import com.example.internetbanking.dto.AuthRequest;
 import com.example.internetbanking.dto.OtpRequest;
 import com.example.internetbanking.dto.PasswordRequest;
 import com.example.internetbanking.dto.RegisterOtp;
-import com.example.internetbanking.entity.User;
 import com.example.internetbanking.service.impl.UserServiceImpl;
 import com.example.internetbanking.dto.RegistrationRequest;
 @RestController

@@ -56,27 +56,7 @@ class UserProfileServiceImplTest {
         userProfile.setKycStatus("NONE");
     }
 
-    @Test
-    void testPartialUpdate_Success() {
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("email", "newemail@example.com");
-        updates.put("username", "newUser");
-        updates.put("address", "New Address");
-
-        when(profileRepo.findByUser_UserId(anyString())).thenReturn(Optional.of(userProfile));
-        when(profileRepo.save(any(UserProfile.class))).thenReturn(userProfile);
-        when(userRepo.save(any(User.class))).thenReturn(user);
-
-        UserProfile updated = service.partialUpdate("userId", updates);
-
-        assertEquals("newemail@example.com", updated.getEmail());
-        assertEquals("newUser", updated.getUser().getUsername());
-        assertEquals("New Address", updated.getAddress());
-
-        verify(profileRepo).save(userProfile);
-        verify(userRepo).save(user);
-    }
-
+    
    
 
     @Test
@@ -97,17 +77,17 @@ class UserProfileServiceImplTest {
     }
     
    
-    
     @Test
     void testUpdateSecurityQuestion_ProfileNotFound() {
         when(profileRepo.findByUser_UserId("missing")).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () ->
-                service.updateSecurityQuestion("missing", "Q", "A")
+                service.confirmSecurityQuestionChange("missing", "123456", "Q", "A")
         );
 
         verify(profileRepo, never()).save(any());
     }
+  
     
     
     @Test

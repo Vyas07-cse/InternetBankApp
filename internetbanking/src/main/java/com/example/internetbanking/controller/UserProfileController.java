@@ -106,16 +106,23 @@ public class UserProfileController {
         return ResponseEntity.ok("Notification marked as read");
     }
     
-    @PutMapping("/{userId}/security-question")
+    @PutMapping("/{userId}/security-question/initiate")
+    public ResponseEntity<String> initiateSecurityQuestionUpdate(@PathVariable String userId) {
+        profileService.initiateSecurityQuestionOtp(userId);
+        return ResponseEntity.ok("Security Question OTP sent");
+    }
+
+    @PutMapping("/{userId}/security-question/confirm")
     public ResponseEntity<String> updateSecurityQuestion(
             @PathVariable String userId,
             @RequestBody Map<String, String> payload) {
-        profileService.updateSecurityQuestion(
+        profileService.confirmSecurityQuestionChange(
                 userId,
+                payload.get("otp"),
                 payload.get("securityQuestion"),
                 payload.get("securityAnswer")
         );
-        return ResponseEntity.ok("Security question updated");
+        return ResponseEntity.ok("Security question updated successfully");
     }
     
     @PutMapping("/{userId}/alerts")

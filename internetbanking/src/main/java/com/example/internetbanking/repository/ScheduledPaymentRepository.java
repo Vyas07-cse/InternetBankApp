@@ -10,5 +10,6 @@ import java.util.List;
 public interface ScheduledPaymentRepository extends JpaRepository<ScheduledPayment, Long> {
     List<ScheduledPayment> findByAccountNumber(String accountNumber);
     List<ScheduledPayment> findByStatusAndScheduledDateBefore(String status, LocalDateTime scheduledDate);
+	List<ScheduledPayment> findByStatus(String string);
 
 }

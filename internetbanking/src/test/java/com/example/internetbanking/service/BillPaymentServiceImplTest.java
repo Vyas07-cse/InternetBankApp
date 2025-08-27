@@ -6,14 +6,13 @@ import com.example.internetbanking.exception.AccountOperationException;
 import com.example.internetbanking.exception.BillPaymentException;
 import com.example.internetbanking.repository.AccountRepository;
 import com.example.internetbanking.repository.BillPaymentRepository;
+import com.example.internetbanking.service.impl.BillPaymentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import com.example.internetbanking.service.impl.BillPaymentServiceImpl; 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,7 +36,7 @@ class BillPaymentServiceImplTest {
     void setUp() {
         mockAccount = new Account();
         mockAccount.setAccountNumber("1234567890");
-        mockAccount.setCurrentBalance(new BigDecimal("1000.00"));
+        mockAccount.setCurrentBalance(1000.00);
         mockAccount.setTpin(1234);
     }
 
@@ -46,7 +45,7 @@ class BillPaymentServiceImplTest {
         when(accountRepository.findByAccountNumber("1234567890"))
                 .thenReturn(Optional.of(mockAccount));
 
-        String result = billPaymentService.payBill("1234567890", "Electricity", new BigDecimal("500.00"), "ELEC12345");
+        String result = billPaymentService.payBill("1234567890", "Electricity", 500.00, "ELEC12345");
 
         assertTrue(result.contains("Bill payment successful! UTR:"));
         verify(accountRepository, times(1)).save(any(Account.class));
@@ -55,11 +54,11 @@ class BillPaymentServiceImplTest {
 
     @Test
     void testPayBill_InsufficientBalance() {
-        mockAccount.setCurrentBalance(new BigDecimal("100.00"));
+        mockAccount.setCurrentBalance(100.00);
         when(accountRepository.findByAccountNumber("1234567890"))
                 .thenReturn(Optional.of(mockAccount));
 
-        String result = billPaymentService.payBill("1234567890", "Electricity", new BigDecimal("500.00"), "ELEC12345");
+        String result = billPaymentService.payBill("1234567890", "Electricity", 500.00, "ELEC12345");
 
         assertEquals("Insufficient balance to pay the bill.", result);
         verify(accountRepository, never()).save(any());
@@ -68,7 +67,7 @@ class BillPaymentServiceImplTest {
     @Test
     void testPayBill_InvalidBillType() {
         Exception ex = assertThrows(AccountOperationException.class, () ->
-                billPaymentService.payBill("1234567890", "InvalidType", new BigDecimal("100.00"), "ELEC12345"));
+                billPaymentService.payBill("1234567890", "InvalidType", 100.00, "ELEC12345"));
 
         assertTrue(ex.getMessage().contains("Invalid bill type"));
     }
@@ -79,7 +78,7 @@ class BillPaymentServiceImplTest {
                 .thenReturn(Optional.of(mockAccount));
 
         Exception ex = assertThrows(BillPaymentException.class, () ->
-                billPaymentService.payBill("1234567890", "Electricity", new BigDecimal("100.00"), "WRONG123"));
+                billPaymentService.payBill("1234567890", "Electricity", 100.00, "WRONG123"));
 
         assertEquals("Electricity service numbers must start with 'ELEC'", ex.getMessage());
     }
@@ -88,6 +87,7 @@ class BillPaymentServiceImplTest {
     void testGetBillPaymentHistory_Success() {
         List<BillPayment> payments = new ArrayList<>();
         payments.add(new BillPayment());
+
         when(accountRepository.findByAccountNumber("1234567890"))
                 .thenReturn(Optional.of(mockAccount));
         when(billPaymentRepository.findByAccountNumber("1234567890"))
@@ -109,7 +109,7 @@ class BillPaymentServiceImplTest {
     @Test
     void testPayBill_InvalidAmount() {
         Exception ex = assertThrows(AccountOperationException.class, () ->
-                billPaymentService.payBill("1234567890", "Electricity", new BigDecimal("0.00"), "ELEC12345"));
+                billPaymentService.payBill("1234567890", "Electricity", 0.00, "ELEC12345"));
 
         assertEquals("BillAmount must be greater than Zero", ex.getMessage());
     }

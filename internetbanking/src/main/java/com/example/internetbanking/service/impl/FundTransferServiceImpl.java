@@ -17,11 +17,15 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.internetbanking.service.FundTransferService;
-import java.math.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
+
 public class FundTransferServiceImpl implements FundTransferService{
 	 @Autowired
 	 private JavaMailSender mailSender;
@@ -37,31 +41,29 @@ public class FundTransferServiceImpl implements FundTransferService{
     @Autowired
     private BeneficiaryRepository beneficiaryRepo;
     
+    private static final Logger log = LoggerFactory.getLogger(FundTransferServiceImpl.class);
 
 
     public FundTransferResponse transfer(FundTransferRequest request) {
+    	
         String transferType = request.getTransferType().toUpperCase();
         if (!transferType.equals("IMPS") && !transferType.equals("NEFT")) {
-            throw new IllegalArgumentException("Invalid transfer type. Allowed: IMPS, NEFT");
+            throw new CustomException("Invalid transfer type. Allowed: IMPS, NEFT");
         }
 
         Optional<Account> fromAccOpt = accountRepo.findByAccountNumber(request.getFromAccount());
         if (fromAccOpt.isEmpty()) {
-            throw new IllegalArgumentException("Sender account not found");
+            throw new CustomException("Sender account not found");
         }
         Account fromAccount = fromAccOpt.get();
         if (fromAccount.getTpin() != request.getTpin()) {
-            throw new IllegalArgumentException("Invalid TPIN");
-        }
-        
-        if (fromAccount.getCurrentBalance().compareTo(BigDecimal.valueOf(request.getAmount())) < 0) {
-            throw new IllegalStateException("Insufficient balance");
+            throw new CustomException("Invalid TPIN");
         }
 
         LocalDateTime now = LocalDateTime.now();
         if (request.getScheduledDate() == null || !request.getScheduledDate().isAfter(now)) {
-        	if (fromAccount.getCurrentBalance().compareTo(BigDecimal.valueOf(request.getAmount())) < 0) {
-                throw new IllegalStateException("Insufficient balance");
+        	if (fromAccount.getCurrentBalance()<request.getAmount()) {
+                throw new CustomException("Insufficient balance");
             }
         }
 
@@ -69,12 +71,13 @@ public class FundTransferServiceImpl implements FundTransferService{
 
         if (request.getScheduledDate() != null ) {
         	if (!request.getScheduledDate().isAfter(now)) {
-                throw new IllegalArgumentException("Scheduled date must be in the future.");
+                throw new CustomException("Scheduled date must be in the future.");
             }
              saveScheduledTransfer(request, "PENDING");
              return new FundTransferResponse("scheduled", "Transfer scheduled successfully",null);
         } else {
                 if (isIntraBank) {
+                	log.info("called");
                 return handleIntraBankTransfer(fromAccount, request.getToAccount(), request.getAmount(), transferType);
             } else {
                 return handleInterBankTransfer(fromAccount, request.getToAccount(), request.getAmount(), transferType);
@@ -106,10 +109,8 @@ public class FundTransferServiceImpl implements FundTransferService{
     private FundTransferResponse handleIntraBankTransfer(Account fromAccount, String toAccountNumber, double amount, String transferType) {
         Account toAccount = accountRepo.findByAccountNumber(toAccountNumber).get();
 
-        fromAccount.setCurrentBalance(
-        fromAccount.getCurrentBalance().subtract(BigDecimal.valueOf(amount)));
-        toAccount.setCurrentBalance(
-        toAccount.getCurrentBalance().add(BigDecimal.valueOf(amount)));
+        fromAccount.setCurrentBalance(fromAccount.getCurrentBalance()-amount);
+        toAccount.setCurrentBalance(toAccount.getCurrentBalance()+amount);
 
         accountRepo.save(fromAccount);
         accountRepo.save(toAccount);
@@ -122,9 +123,7 @@ public class FundTransferServiceImpl implements FundTransferService{
 
     private FundTransferResponse handleInterBankTransfer(Account fromAccount, String toAccountNumber, double amount, String transferType) {
 
-        fromAccount.setCurrentBalance(
-            fromAccount.getCurrentBalance().subtract(BigDecimal.valueOf(amount))
-        );
+        fromAccount.setCurrentBalance(fromAccount.getCurrentBalance()-amount);
         accountRepo.save(fromAccount);
        
         String utr = generateUtrNumber();
@@ -177,7 +176,9 @@ public class FundTransferServiceImpl implements FundTransferService{
         beneficiary.setOtp(otp);
         beneficiaryRepo.save(beneficiary);
         User user=userRepo.findByUserId(beneficiary.getUserId());
-        sendOtp(user.getEmail(), otp);
+        sendUpdate(user.getEmail(),"Beneficiary Verify","Dear User,\n\nYour OTP for beneficiary verification is: " + otp +" for ID "+beneficiary.getBeneficiaryId()+
+                "\n\nPlease use this OTP to verify the beneficiary within the next 10 minutes." +
+                "\n\nThank you,\nYour Bank Team");
         return "OTP sent for verification for Id "+beneficiary.getBeneficiaryId();
     }
 

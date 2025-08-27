@@ -1,7 +1,6 @@
 package com.example.internetbanking.controller;
 
 import com.example.internetbanking.dto.FundTransferRequest;
-import com.example.internetbanking.dto.FundTransferRequest;
 import com.example.internetbanking.dto.FundTransferResponse;
 import com.example.internetbanking.dto.OtpVerifyRequest;
 import com.example.internetbanking.entity.Beneficiary;
@@ -16,7 +15,6 @@ import com.example.internetbanking.exception.UserNotFoundException;
 import jakarta.validation.*;
 import org.springframework.validation.annotation.Validated;
 import java.util.List;
-import java.util.Optional;
 @Validated
 @RestController
 @RequestMapping("/api/transfer")

@@ -1,13 +1,11 @@
 package com.example.internetbanking.service.impl;
 
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import org.springframework.beans.factory.annotation.Value;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import org.springframework.security.core.userdetails.UserDetails;

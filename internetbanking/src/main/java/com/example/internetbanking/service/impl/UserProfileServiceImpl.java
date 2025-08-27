@@ -2,12 +2,12 @@ package com.example.internetbanking.service.impl;
 
 import com.example.internetbanking.entity.User;
 import com.example.internetbanking.entity.UserProfile;
+import com.example.internetbanking.exception.CustomException;
 import com.example.internetbanking.exception.InvalidOtpException;
 import com.example.internetbanking.exception.InvalidPasswordException;
 import com.example.internetbanking.exception.UserNotFoundException;
 import com.example.internetbanking.repository.UserProfileRepository;
 import com.example.internetbanking.repository.UserRepository;
-import com.example.internetbanking.util.OtpUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +25,6 @@ public class UserProfileServiceImpl {
 
     @Autowired
     private UserRepository userRepo;
-
-    @Autowired
-    private OtpUtil otpUtil;
 
     @Autowired
     private EmailServiceImpl emailService;
@@ -90,7 +87,7 @@ public class UserProfileServiceImpl {
     	User user=userRepo.findByUserId(userId);
     
         if (!user.getVerificationCode().matches(otp)) {
-            throw new InvalidOtpException("Invalid or expired OTP");
+            throw new CustomException("invalid or expired OTP");
         }
 
         UserProfile profile = profileRepo.findByUser_UserId(userId)
@@ -99,12 +96,12 @@ public class UserProfileServiceImpl {
        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 if (!passwordEncoder.matches(oldPwd, profile.getPassword())) {
-    throw new InvalidPasswordException("Old password is incorrect");
+    throw new CustomException("Old password is incorrect");
 }
 
 
         if (oldPwd.equals(newPwd)) {
-            throw new IllegalArgumentException("New password cannot be the same as old password");
+            throw new CustomException("New password cannot be the same as old password");
         }
 
         
@@ -187,13 +184,44 @@ if (!passwordEncoder.matches(oldPwd, profile.getPassword())) {
         }, 300_000L);
     }
     
-    public void updateSecurityQuestion(String userId, String question, String answer) {
-    UserProfile profile = profileRepo.findByUser_UserId(userId)
-            .orElseThrow(() -> new UserNotFoundException("Profile not found"));
-    profile.setSecurityQuestion(question);
-    profile.setSecurityAnswer(answer);
-    profileRepo.save(profile);
-}
+    public void initiateSecurityQuestionOtp(String userId) {
+        UserProfile profile = profileRepo.findByUser_UserId(userId)
+                .orElseThrow(() -> new UserNotFoundException("Profile not found"));
+
+        User user = userRepo.findByUserId(userId);
+        if (user == null) {
+            throw new UserNotFoundException("User not found");
+        }
+
+        String otp = generateOtp();
+        user.setVerificationCode(otp);
+        userRepo.save(user);
+
+        emailService.sendOtpEmail(profile.getEmail(), otp);
+
+        logger.info("Security Question update OTP sent for user " + userId);
+    }
+
+
+    public void confirmSecurityQuestionChange(String userId, String otp, String question, String answer) {
+        UserProfile profile = profileRepo.findByUser_UserId(userId)
+                .orElseThrow(() -> new UserNotFoundException("Profile not found"));
+
+        User user = userRepo.findByUserId(userId);
+        if (user == null) {
+            throw new UserNotFoundException("User not found");
+        }
+
+        if (!user.getVerificationCode().equals(otp)) {
+            throw new InvalidOtpException("Invalid or expired OTP");
+        }
+
+        profile.setSecurityQuestion(question);
+        profile.setSecurityAnswer(answer);
+        profileRepo.save(profile);
+
+        logger.info("Security question updated for user " + userId);
+    }
 
     
     

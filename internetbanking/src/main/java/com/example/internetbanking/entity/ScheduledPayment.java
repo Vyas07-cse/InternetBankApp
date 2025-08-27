@@ -20,7 +20,7 @@ public class ScheduledPayment {
     private String billType;
     
     @NotNull(message = "Amount is required")
-    private BigDecimal amount;
+    private double amount;
     
     private LocalDateTime scheduledDate;
     private String status; 
@@ -54,11 +54,11 @@ public class ScheduledPayment {
         this.billType = billType;
     }
 
-    public BigDecimal getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(BigDecimal amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
     }
 

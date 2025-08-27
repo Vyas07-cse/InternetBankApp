@@ -31,7 +31,7 @@ public class Transaction {
     @Column(name = "scheduled_date")
     private LocalDateTime scheduledDate;
    
-    @Column(name = "utr_number", unique = true)
+    @Column(name = "utr_number")
     private String utrNumber;
 
 

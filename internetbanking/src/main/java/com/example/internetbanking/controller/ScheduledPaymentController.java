@@ -6,8 +6,6 @@ import com.example.internetbanking.service.ScheduledPaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.example.internetbanking.util.BillTypeValidator;
-import com.example.internetbanking.exception.AccountOperationException;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
 

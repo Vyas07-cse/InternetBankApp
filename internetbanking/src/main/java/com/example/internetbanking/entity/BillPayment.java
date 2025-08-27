@@ -15,7 +15,7 @@ public class BillPayment {
 
     private String accountNumber;
     private String billType;
-    private BigDecimal billAmount;
+    private double billAmount;
     private LocalDateTime paymentDate;
     private String serviceNumber;
     
@@ -53,11 +53,11 @@ public class BillPayment {
         this.billType = billType;
     }
 
-    public BigDecimal getBillAmount() {
+    public double getBillAmount() {
         return billAmount;
     }
 
-    public void setBillAmount(BigDecimal billAmount) {
+    public void setBillAmount(double billAmount) {
         this.billAmount = billAmount;
     }
 

@@ -57,7 +57,7 @@ public class ScheduledPaymentServiceImpl implements ScheduledPaymentService {
         default:
             throw new AccountOperationException("Invalid bill type. Allowed types: Electricity, Gas, Water");
     }
-    	if (payment.getAmount() == null || payment.getAmount().doubleValue() <= 0) {
+    	if (payment.getAmount() == 0 || payment.getAmount() <= 0) {
             throw new AccountOperationException("Scheduled amount must be greater than 0");
         }
     	

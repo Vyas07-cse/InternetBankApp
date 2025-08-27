@@ -35,13 +35,13 @@ public class AccountServiceImpl implements AccountService {
     
     
     @Override
-    public boolean rechargeAccount(String accountNumber, int tpin, BigDecimal amount) {
+    public boolean rechargeAccount(String accountNumber, int tpin, double amount) {
         Optional<Account> optionalAccount = accountRepository.findByAccountNumber(accountNumber);
         
         if (optionalAccount.isPresent()) {
             Account account = optionalAccount.get();
             if (account.getTpin() == tpin) {
-                BigDecimal newBalance = account.getCurrentBalance().add(amount);
+                double newBalance = account.getCurrentBalance()+amount;
                 account.setCurrentBalance(newBalance);
                 accountRepository.save(account);
                 return true;
@@ -54,7 +54,7 @@ public class AccountServiceImpl implements AccountService {
     public List<Transaction> getTransactions(String accNo) {
     	accountRepository.findByAccountNumber(accNo)
         .orElseThrow(() -> new AccountOperationException("Account number not found: " + accNo));
-        return txnRepo.findByFromAccount(accNo);
+        return txnRepo.findByAccount(accNo);
     }
 
     public List<Transaction> getMiniStatement(String accNo) {
@@ -62,7 +62,7 @@ public class AccountServiceImpl implements AccountService {
         .orElseThrow(() -> new AccountOperationException("Account number not found: " + accNo));
         return txnRepo.findTop5ByFromAccountOrderByDateTimeDesc(accNo);
     }
-    public BigDecimal getBalance(String acccNo) {
+    public double getBalance(String acccNo) {
     	accountRepository.findByAccountNumber(acccNo)
         .orElseThrow(() -> new AccountOperationException("Account number not found: " + acccNo));
     	Optional<Account> account=accountRepository.findByAccountNumber(acccNo);
@@ -88,11 +88,11 @@ public class AccountServiceImpl implements AccountService {
     }
     
     @Override
-    public Account createAccount1(String userId, String accountType, BigDecimal initialBalance,int tpin) {
+    public Account createAccount1(String userId, String accountType, double initialBalance,int tpin) {
         Account account = new Account();
         account.setUserId(userId);
         account.setAccountType(accountType);
-        account.setCurrentBalance(initialBalance != null ? initialBalance : BigDecimal.ZERO);
+        account.setCurrentBalance(initialBalance);
         account.setCreatedAt(LocalDateTime.now());
         account.setTpin(tpin);
         String accountNumber;

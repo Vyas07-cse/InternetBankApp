@@ -1,8 +1,6 @@
 package com.example.internetbanking.entity;
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
 import jakarta.validation.constraints.*;
 @Entity
 @Table(name = "accounts")
@@ -16,7 +14,6 @@ public class Account {
     private String userId;
     
     
-    
     @Column(unique = true)
     private String accountNumber;
     
@@ -24,7 +21,10 @@ public class Account {
     private String accountType;
     
     @NotNull(message = "Balance is required")
-    private BigDecimal currentBalance;
+    @Min(value = 0, message = "Balance cannot be negative")
+    private double currentBalance;
+
+
     
     @NotNull(message = "tpin is required")
     private int tpin;
@@ -65,11 +65,11 @@ public class Account {
         this.accountType = accountType;
     }
 
-    public BigDecimal getCurrentBalance() {
+    public double  getCurrentBalance() {
         return currentBalance;
     }
 
-    public void setCurrentBalance(BigDecimal currentBalance) {
+    public void setCurrentBalance(double currentBalance) {
         this.currentBalance = currentBalance;
     }
     

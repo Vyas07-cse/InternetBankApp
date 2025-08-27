@@ -34,7 +34,7 @@ public class AccountController {
     }
    
     @GetMapping("/balance/{accNo}")
-    public ResponseEntity<BigDecimal> getAccountBalance(@PathVariable String accNo) {
+    public ResponseEntity<Double> getAccountBalance(@PathVariable String accNo) {
         return ResponseEntity.ok(accountService.getBalance(accNo));
     }
     @GetMapping("/details/{accNo}")
@@ -57,7 +57,7 @@ public class AccountController {
 
         String userId = account.getUserId();
         String accountType = account.getAccountType();
-        BigDecimal initialBalance = account.getCurrentBalance();
+        double initialBalance = account.getCurrentBalance();
         int tpin = account.getTpin();
 
         User userOpt = userRepository.findByUserId(userId);

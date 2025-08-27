@@ -3,8 +3,11 @@ package com.example.internetbanking.service.impl;
 import com.example.internetbanking.exception.BillPaymentException;
 import com.example.internetbanking.entity.Account;
 import com.example.internetbanking.entity.BillPayment;
+import com.example.internetbanking.entity.Transaction;
 import com.example.internetbanking.repository.AccountRepository;
 import com.example.internetbanking.repository.BillPaymentRepository;
+import com.example.internetbanking.repository.TransactionRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.internetbanking.util.BillTypeValidator;
@@ -22,24 +25,27 @@ public class BillPaymentServiceImpl  {
 
     @Autowired
     private BillPaymentRepository billPaymentRepository;
+    @Autowired
+    private TransactionRepository transactionRepository;
     
     @Transactional
-    public String payBill(String accountNumber, String billType, BigDecimal billAmount,String serviceNumber) {
+    public String payBill(String accountNumber, String billType, double  billAmount,String serviceNumber) {
     	if (!BillTypeValidator.isValid(billType)) {
             throw new AccountOperationException("Invalid bill type. Valid types: " + BillTypeValidator.getValidTypes());
         }
         System.out.println("Received payment request for account: " + accountNumber);
-        if(billAmount==null || billAmount.compareTo(BigDecimal.ZERO) <= 0)
-        {
-        	throw new AccountOperationException("BillAmount must be greater than Zero");
-        }
-        Account account = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new BillPaymentException("Account not found for number: " + accountNumber));
+       
+            if (billAmount <= 0) {
+                throw new AccountOperationException("Bill amount must be greater than zero");
+            }
 
+            Account account = accountRepository.findByAccountNumber(accountNumber)
+                    .orElseThrow(() -> new BillPaymentException("Account not found for number: " + accountNumber));
 
-        if (account.getCurrentBalance().compareTo(billAmount) < 0) {
-            return "Insufficient balance to pay the bill.";
-        }
+            if (account.getCurrentBalance() < billAmount) {
+                return "Insufficient balance to pay the bill.";
+            }
+
         
         switch (billType.toLowerCase()) {
         case "electricity":
@@ -65,7 +71,7 @@ public class BillPaymentServiceImpl  {
     }
 
  
-        account.setCurrentBalance(account.getCurrentBalance().subtract(billAmount));
+        account.setCurrentBalance(account.getCurrentBalance()-billAmount);
         accountRepository.save(account);
         System.out.println("Balance deducted. New balance: " + account.getCurrentBalance());
 
@@ -77,7 +83,16 @@ public class BillPaymentServiceImpl  {
         payment.setPaymentDate(LocalDateTime.now());
         payment.setUtrNumber(generateUtrNumber());
         payment.setServiceNumber(serviceNumber);
-
+        Transaction txn=new Transaction();
+        txn.setFromAccount(accountNumber);
+        txn.setId(transactionId());
+        txn.setToAccount(serviceNumber);
+        txn.setDateTime(LocalDateTime.now());
+        txn.setStatus("Success");
+        txn.setMode("Bills");
+        txn.setUtrNumber(payment.getUtrNumber());
+        txn.setAmount(billAmount);
+        transactionRepository.save(txn);
         billPaymentRepository.save(payment);
         System.out.println("Bill payment saved. UTR: " + payment.getUtrNumber());
 
@@ -88,7 +103,9 @@ public class BillPaymentServiceImpl  {
     private String generateUtrNumber() {
         return "UTR" + System.currentTimeMillis();
     }
-    
+    private String transactionId() {
+    	return "TXN"+(int)(1000 + Math.random() * 9000);
+    }
    
     public List<BillPayment> getBillPaymentHistory(String accountNumber) {
     	Account account = accountRepository.findByAccountNumber(accountNumber)

@@ -76,7 +76,7 @@ public class UserServiceImpl {
 
         String otp = generateVerificationCode();
         user.setVerificationCode(otp);
-        user.setCodeExpiry(Date.from(Instant.now().plus(10, ChronoUnit.MINUTES)));
+      
 
         User savedUser = userRepo.save(user);
         userRepo.flush();

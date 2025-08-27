@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface AccountService {
 
-    Account createAccount1(String userId, String accountType, BigDecimal initialBalance,int tpin);
+    Account createAccount1(String userId, String accountType, double initialBalance,int tpin);
 
     Account getAccountByNumber(String accountNumber);
 
@@ -18,10 +18,10 @@ public interface AccountService {
 
     List<Transaction> getMiniStatement(String accNo);
 
-    BigDecimal getBalance(String accNo);
+    double getBalance(String accNo);
 
     Account getAccount(String accNo);
 
-    boolean rechargeAccount(String accountNumber, int tpin, BigDecimal amount);
+    boolean rechargeAccount(String accountNumber, int tpin, double amount);
 
 }

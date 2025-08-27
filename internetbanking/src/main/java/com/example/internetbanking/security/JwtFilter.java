@@ -29,7 +29,7 @@ public class JwtFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 		 if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
 		        filterChain.doFilter(request, response);
-		        return;  // skip JWT validation on OPTIONS
+		        return;  
 		    }
 		String authHeader=request.getHeader("Authorization");
 		String token=null;

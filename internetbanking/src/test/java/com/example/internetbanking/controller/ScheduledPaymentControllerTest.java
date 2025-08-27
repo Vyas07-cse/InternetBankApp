@@ -17,7 +17,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -41,7 +40,6 @@ class ScheduledPaymentControllerTest {
     @MockBean
     private JWTService jwtService;
 
-
     private ScheduledPayment payment;
 
     @BeforeEach
@@ -51,7 +49,7 @@ class ScheduledPaymentControllerTest {
         payment.setAccountNumber("123456789012");
         payment.setBillType("Electricity");
         payment.setServiceNumber("ELEC123456");
-        payment.setAmount(new BigDecimal("499.99"));
+        payment.setAmount(499.99);  // changed from BigDecimal to double
         payment.setScheduledDate(LocalDateTime.now().plusDays(3));
         payment.setStatus("Scheduled");
     }

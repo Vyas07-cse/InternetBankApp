@@ -18,7 +18,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 import static org.mockito.Mockito.when;
@@ -48,13 +47,13 @@ public class BillPaymentControllerTest {
     void setUp() {
         request = new PayBillRequest();
         request.setAccountNumber("1234567890");
-        request.setBillAmount(new BigDecimal("250.00"));
+        request.setBillAmount(250.00);
         request.setBillType("Electricity");
         request.setServiceNumber("ELEC1234");
 
         BillPayment payment = new BillPayment();
         payment.setBillType("Electricity");
-        payment.setBillAmount(new BigDecimal("250.00"));
+        payment.setBillAmount(250.00);
         payment.setServiceNumber("ELEC1234");
         payment.setAccountNumber("1234567890");
 
@@ -67,7 +66,7 @@ public class BillPaymentControllerTest {
         when(billPaymentService.payBill(
                 ArgumentMatchers.anyString(),
                 ArgumentMatchers.anyString(),
-                ArgumentMatchers.any(BigDecimal.class),
+                ArgumentMatchers.anyDouble(),
                 ArgumentMatchers.anyString()))
                 .thenReturn("Bill paid successfully");
 
@@ -109,7 +108,7 @@ public class BillPaymentControllerTest {
         when(billPaymentService.payBill(
                 ArgumentMatchers.anyString(),
                 ArgumentMatchers.anyString(),
-                ArgumentMatchers.any(BigDecimal.class),
+                ArgumentMatchers.anyDouble(),
                 ArgumentMatchers.anyString()))
                 .thenThrow(new BillPaymentException("Invalid bill details"));
 

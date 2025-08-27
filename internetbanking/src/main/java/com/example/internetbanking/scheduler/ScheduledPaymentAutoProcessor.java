@@ -50,10 +50,10 @@ public class ScheduledPaymentAutoProcessor {
             Optional<Account> accountOpt = accountRepository.findByAccountNumber(payment.getAccountNumber());
             if (accountOpt.isPresent()) {
                 Account account = accountOpt.get();
-                BigDecimal amount = payment.getAmount();
+                double amount = payment.getAmount();
 
-                if (account.getCurrentBalance().compareTo(amount) >= 0) {
-                    account.setCurrentBalance(account.getCurrentBalance().subtract(amount));
+                if (account.getCurrentBalance()>=amount) {
+                    account.setCurrentBalance(account.getCurrentBalance()-amount);
                     accountRepository.save(account);
 
                     BillPayment billPayment = new BillPayment();
@@ -64,6 +64,16 @@ public class ScheduledPaymentAutoProcessor {
                     billPayment.setPaymentDate(LocalDateTime.now());
                     billPayment.setUtrNumber("UTR" + System.currentTimeMillis());
                     billPaymentRepository.save(billPayment);
+                    Transaction txn=new Transaction();
+                    txn.setFromAccount(payment.getAccountNumber());
+                    txn.setId(transactionId());
+                    txn.setToAccount(payment.getServiceNumber());
+                    txn.setDateTime(LocalDateTime.now());
+                    txn.setStatus("Success");
+                    txn.setMode("Bills");
+                    txn.setUtrNumber(billPayment.getUtrNumber());
+                    txn.setAmount(billPayment.getBillAmount());
+                    transactionRepo.save(txn);
 
                     payment.setStatus("Completed");
                     scheduledPaymentRepository.save(payment);
@@ -79,7 +89,9 @@ public class ScheduledPaymentAutoProcessor {
     private String generateUtrNumber() {
         return "UTR" + System.currentTimeMillis();
     }
-
+    private String transactionId() {
+    	return "TXN"+(int)(1000 + Math.random() * 9000);
+    }
     
     @Transactional
     @Scheduled(fixedRate = 60000)  
@@ -99,21 +111,21 @@ public class ScheduledPaymentAutoProcessor {
 
             Account fromAccount = fromOpt.get();
 
-            if (fromAccount.getCurrentBalance().compareTo(BigDecimal.valueOf(txn.getAmount())) < 0) {
+            if (fromAccount.getCurrentBalance()<txn.getAmount()) {
                 txn.setStatus("FAILED");
                 transactionRepo.save(txn);
                 continue;
             }
 
             fromAccount.setCurrentBalance(
-            	    fromAccount.getCurrentBalance().subtract(BigDecimal.valueOf(txn.getAmount()))
+            	    fromAccount.getCurrentBalance()-txn.getAmount()
             	);
             accountRepository.save(fromAccount);
 
             if (toOpt.isPresent()) {
                 Account toAccount = toOpt.get();
                 toAccount.setCurrentBalance(
-                toAccount.getCurrentBalance().add(BigDecimal.valueOf(txn.getAmount())));
+                toAccount.getCurrentBalance()+txn.getAmount());
                 accountRepository.save(toAccount);
 
             } 
@@ -132,5 +144,16 @@ public class ScheduledPaymentAutoProcessor {
         message.setText(msg);
         mailSender.send(message);
 
+    }
+    @Scheduled(fixedRate = 5 * 60 * 1000)
+    public void cleanupCompletedTransactions() {
+        List<ScheduledPayment> completedTransactions = 
+                scheduledPaymentRepository.findByStatus("COMPLETED");
+
+        if (!completedTransactions.isEmpty()) {
+            scheduledPaymentRepository.deleteAll(completedTransactions);
+            
+        } else {
+        }
     }
 }
