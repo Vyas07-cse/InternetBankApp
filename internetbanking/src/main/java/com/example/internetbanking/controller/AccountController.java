@@ -19,7 +19,6 @@ import java.util.*;
 @RestController
 @Validated
 @RequestMapping("/api/accounts")
-@CrossOrigin(origins = "*")
 public class AccountController {
 
     @Autowired
