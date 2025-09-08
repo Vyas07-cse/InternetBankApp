@@ -6,14 +6,10 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender; 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import javax.print.attribute.standard.DateTimeAtCompleted;
 
 @Component
 public class ScheduledPaymentAutoProcessor {
@@ -145,6 +141,7 @@ public class ScheduledPaymentAutoProcessor {
         mailSender.send(message);
 
     }
+    @Transactional
     @Scheduled(fixedRate = 5 * 60 * 1000)
     public void cleanupCompletedTransactions() {
         List<ScheduledPayment> completedTransactions = 

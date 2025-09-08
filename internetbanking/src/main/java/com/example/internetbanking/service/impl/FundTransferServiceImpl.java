@@ -16,6 +16,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.internetbanking.service.FundTransferService;
 
 import org.slf4j.Logger;
@@ -84,7 +86,7 @@ public class FundTransferServiceImpl implements FundTransferService{
             }
         }
     }
-
+    
     private void saveScheduledTransfer(FundTransferRequest request, String status) {
         Transaction txn = new Transaction();
         txn.setId(getTxnId());
@@ -140,7 +142,7 @@ public class FundTransferServiceImpl implements FundTransferService{
         return new FundTransferResponse("completed", "success",utr);
     }
 
-
+    @Transactional
     private void saveTransaction(String fromAccount, String toAccount, double amount, String mode, String status, LocalDateTime dateTime,String utrNumber) {
         Transaction txn = new Transaction();
         Optional<Account> acountlist=accountRepo.findByAccountNumber(fromAccount);

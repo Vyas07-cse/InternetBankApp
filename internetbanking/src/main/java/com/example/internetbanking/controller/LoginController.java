@@ -16,7 +16,6 @@ import com.example.internetbanking.dto.RegisterOtp;
 import com.example.internetbanking.service.impl.UserServiceImpl;
 import com.example.internetbanking.dto.RegistrationRequest;
 @RestController
-@Validated
 @RequestMapping("/auth")
 public class LoginController {
 

@@ -95,9 +95,6 @@ class FundTransferControllerTest {
             .andExpect(content().string(containsString("Transfer successful")));
     }
 
-
-
- 
    
     @Test
     void testAddBeneficiary() throws Exception {
@@ -140,7 +137,7 @@ class FundTransferControllerTest {
 
     @Test
     void testGetTxnStatus() throws Exception {
-        when(fundTransferService.getTxnStatus("srk")).thenReturn("COMPLETED");
+        when(fundTransferService.getTxnStatus("1")).thenReturn("COMPLETED");
 
         mockMvc.perform(get("/api/transfer/status/1"))
                 .andExpect(status().isOk())

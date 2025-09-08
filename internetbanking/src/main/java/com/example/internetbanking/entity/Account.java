@@ -13,7 +13,6 @@ public class Account {
     @NotBlank(message = "User ID is required")
     private String userId;
     
-    
     @Column(unique = true)
     private String accountNumber;
     
@@ -24,8 +23,6 @@ public class Account {
     @Min(value = 0, message = "Balance cannot be negative")
     private double currentBalance;
 
-
-    
     @NotNull(message = "tpin is required")
     private int tpin;
 

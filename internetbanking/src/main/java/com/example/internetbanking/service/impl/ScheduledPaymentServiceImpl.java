@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.example.internetbanking.exception.AccountOperationException;
 import com.example.internetbanking.repository.AccountRepository;
 import java.util.*;
-import com.example.internetbanking.repository.BillPaymentRepository;
 import java.time.LocalDateTime;
 
 
@@ -21,10 +20,6 @@ public class ScheduledPaymentServiceImpl implements ScheduledPaymentService {
     @Autowired
     private AccountRepository accountRepository;
 
-    @Autowired
-    private BillPaymentRepository billPaymentRepository;
- 
-    
     @Override
     public String schedulePayment(ScheduledPayment payment) {
     	if (payment.getScheduledDate().isBefore(LocalDateTime.now())) {

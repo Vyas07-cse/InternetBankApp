@@ -1,14 +1,10 @@
 package com.example.internetbanking.service.impl;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import com.example.internetbanking.entity.UserProfile;
 
-import org.hibernate.sql.exec.spi.StandardEntityInstanceResolver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.transform.AbstractClassTransformer;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,7 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.util.ThrowableCauseExtractor;
 import org.springframework.stereotype.Service;
 
 import com.example.internetbanking.repository.LogHistoryRepository;
@@ -131,7 +126,7 @@ public class UserServiceImpl {
     }
 
     public String generateVerificationCode() {
-        int code = (int)(Math.random() * 900000) + 1000;
+        int code = (int)(Math.random() * 9000) + 1000;
         return String.valueOf(code);
     }
     public void sendInfo(String toEmail,String msg) {

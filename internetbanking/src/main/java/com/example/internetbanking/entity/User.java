@@ -19,14 +19,6 @@ public class User {
   
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserProfile profile;
-    
-    @PrePersist
-    public void generateUserId() {
-        if (this.userId == null) {
-            int number = (int) (Math.random() * 1000); 
-            this.userId = String.format("USR%04d", number); 
-        }
-    }
 
 	public String getEmail() {
 		return email;
